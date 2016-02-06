@@ -1,0 +1,17 @@
+@import "../../scss/variables";
+
+.NoteItem {
+  padding: 5px;
+  border: 1px solid transparent;
+
+  a {
+    display: block;
+  }
+}
+
+.NoteItem--active {
+  border: 1px solid $border-color;
+  margin-right: -6px;
+  border-right: $note-background;
+  background: $note-background;
+}
