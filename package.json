@@ -1,14 +1,22 @@
 {
-  "name": "mynotes",
+  "name": "mini-notes",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.ts",
+  "description": "Notes.app clone in Angular2",
+  "main": "src/index.ts",
   "scripts": {
     "start": "webpack-dev-server",
     "build": "webpack"
   },
-  "author": "",
+  "author": "Serkan Yersen",
   "license": "MIT",
+  "homepage": "https://github.com/serkanyersen/mini-notes#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/serkanyersen/mini-notes.git"
+  },
+  "bugs": {
+    "url": "https://github.com/serkanyersen/mini-notes/issues"
+  },
   "dependencies": {
     "angular2": "^2.0.0-beta.3",
     "css-loader": "^0.23.1",
