@@ -7,8 +7,8 @@ import './style.scss';
 @Component({
   selector: 'editor',
   template: `
-      <div class="Editor-editable" [(innerHTML)]="note.content"
-          (keyup)="onChange()"
+      <div class="Editor-editable" [innerHTML]="content"
+          (input)="onChange()"
           contentEditable="true">
       </div>
     `,
@@ -17,20 +17,26 @@ import './style.scss';
   }
 })
 export default class Editor {
+  id: number;
   note: Note;
   root: HTMLElement;
+  editable: HTMLDivElement;
+  content: string;
 
   constructor(
     private routeParams: RouteParams,
     @Inject(ElementRef) elementRef: ElementRef
   ) {
     this.root = elementRef.nativeElement;
-    const id = +routeParams.get('id');
-    this.note = Notes.get(id);
+    this.id = +routeParams.get('id');
+    this.note = Notes.get(this.id);
+    this.content = this.note.content;
   }
 
   ngAfterViewInit() {
-    this.root.querySelector('.Editor-editable').addEventListener("paste", function(e) {
+    this.editable = <HTMLDivElement>this.root.querySelector('.Editor-editable');
+
+    this.editable.addEventListener("paste", function(e) {
       // cancel paste
       e.preventDefault();
 
@@ -46,6 +52,13 @@ export default class Editor {
   }
 
   onChange() {
-    console.log(this.note.content);
+    const content = this.editable.innerHTML;
+    const contentText = this.editable.innerText;
+    const title = contentText.split(/\n|\<br\>/)[0];
+
+    Notes.set(this.id, {
+      title,
+      content
+    });
   }
 }
