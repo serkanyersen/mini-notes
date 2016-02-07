@@ -8,35 +8,65 @@ body {
 }
 
 .View {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .Header, .Footer {
-    width: 100%;
-    padding: 5px;
+  width: 100%;
+  padding: 5px;
 }
 
 .Container {
-    display: flex;
-    flex: 1 1;
-    height: 100%;
-    flex-direction: row;
-    border: 1px solid $border-color;
+  display: flex;
+  flex: 1 1;
+  height: 100%;
+  flex-direction: row;
+  border: 1px solid $border-color;
 }
 
 .Sidebar {
-    border-right: 1px solid $border-color;
-    padding: 5px;
-    min-width: 200px;
+  border-right: 1px solid $border-color;
+  padding: 5px;
+  width: 200px;
+  transition: margin-left 0.2s ease;
+  white-space: nowrap;
+
+  @media(max-width: 400px) {
+    margin-left: -200px;
+    position: absolute;
+    z-index: 1;
+
+    &:after {
+      content: "Notes";
+      position: absolute;
+      border: 1px solid #ccc;
+      background: white;
+      padding: 5px;
+      right: -37px;
+      transform: rotate(90deg);
+      top: 16px;
+    }
+  }
+}
+
+.Sidebar--show {
+  margin-left: 0px;
+  background: white;
+  height: 100%;
+  z-index: 1;
+
+  &:after {
+    display: none;
+  }
 }
 
 .Content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: $note-background;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: $note-background;
 }
 
 router-outlet {

@@ -5,23 +5,23 @@ import './style.scss';
 import Notes, {Note} from '../../notes';
 
 @Component({
-    selector: 'note-nav',
-    template: `<nav>
-        <ul>
-            <li *ngFor="#note of notes" class="NoteItem"
-                [class.NoteItem--active]="router.isRouteActive(router.generate(['Note', {id: note.id}]))">
-                <a [routerLink]="['Note', {id:note.id}]">
-                    {{ note.title }}
-                </a>
-            </li>
-        </ul>
-    </nav>`,
-    directives: [NgFor, ROUTER_DIRECTIVES]
+  selector: 'note-nav',
+  template: `<nav>
+    <ul>
+      <li *ngFor="#note of notes" class="NoteItem"
+          [class.NoteItem--active]="router.isRouteActive(router.generate(['Note', {id: note.id}]))">
+        <a [routerLink]="['Note', {id:note.id}]">
+            {{ note.title }}
+        </a>
+      </li>
+    </ul>
+  </nav>`,
+  directives: [NgFor, ROUTER_DIRECTIVES]
 })
 export default class NoteNav {
-    notes: Note[];
+  notes: Note[];
 
-    constructor(private router: Router) {
-        this.notes = Notes.getList();
-    }
+  constructor(private router: Router) {
+    this.notes = Notes.getList();
+  }
 }

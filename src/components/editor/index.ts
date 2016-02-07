@@ -7,11 +7,11 @@ import './style.scss';
 @Component({
   selector: 'editor',
   template: `
-      <div class="Editor-editable" [innerHTML]="content"
-          (input)="onChange()"
-          contentEditable="true">
-      </div>
-    `,
+    <div class="Editor-editable" [innerHTML]="content"
+        (input)="onChange()"
+        contentEditable="true">
+    </div>
+  `,
   host: {
     class: 'Editor'
   }
