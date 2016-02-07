@@ -1,4 +1,5 @@
 import {extend} from 'lodash';
+import {EventEmitter} from 'angular2/core';
 
 export interface Note {
     id?: number;
@@ -41,7 +42,7 @@ const singleton = new Notes();
 
 singleton.set(1, {id: 1, title: 'My note', content: 'This is my note'});
 singleton.set(2, {id: 2, title: 'test note', content: 'hello world test'})
-singleton.set(3, {id: 3, title: 'html note', content: 'hello <i>world</i> <hr> this is note'})
+singleton.set(3, {id: 3, title: 'html note', content: 'hello <i>world</i><hr>this is <b>note<b>'})
 singleton.set(4, {id: 4, title: 'test', content: 'hmm.'})
 
 export default singleton;
