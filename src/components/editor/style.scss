@@ -1,0 +1,39 @@
+$line-color: #d9eaf3;
+
+.Editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.Editor-editable {
+  flex: 1;
+  outline: none;
+  font: normal 12px/1.5 "Lucida Grande", arial, sans-serif;
+  padding: 6px 5px 4px 42px;
+  position: relative;
+  color: #444;
+  line-height: 20px;
+  white-space: pre-wrap;
+
+  background: -webkit-gradient(linear, 0 0, 0 100%, from($line-color), color-stop(4%, transparent)) 0 4px;
+  background: -webkit-linear-gradient(top, $line-color 0%, transparent 8%) 0 4px;
+  background: -moz-linear-gradient(top, $line-color 0%, transparent 8%) 0 4px;
+  background: -ms-linear-gradient(top, $line-color 0%, transparent 8%) 0 4px;
+  background: -o-linear-gradient(top, $line-color 0%, transparent 8%) 0 4px;
+  background: linear-gradient(top, $line-color 0%, transparent 8%) 0 4px;
+
+  background-size: 100% 20px;
+
+  &:before {
+    content: '';
+    position: absolute;
+    width: 4px;
+    top: 0;
+    left: 30px;
+    bottom: 0;
+    border: 1px solid;
+    border-color: transparent #efe4e4;
+  }
+}

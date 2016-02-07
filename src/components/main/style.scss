@@ -29,6 +29,11 @@
 
 .Content {
     flex: 1;
-    padding: 5px;
+    display: flex;
+    flex-direction: column;
     background: $note-background;
+}
+
+router-outlet {
+  height: 0;
 }
