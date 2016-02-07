@@ -9,6 +9,7 @@ import './style.scss';
   template: `
     <div class="Editor-editable" [innerHTML]="content"
         (input)="onChange()"
+        (keydown)="onKeyDown($event)"
         contentEditable="true">
     </div>
   `,
@@ -49,6 +50,18 @@ export default class Editor {
       // insert text manually
       document.execCommand("insertHTML", false, text);
     });
+  }
+
+  onKeyDown(e: KeyboardEvent) {
+    if(e.keyCode == 9) {
+        document.execCommand('styleWithCSS', true, null);
+        if (e.shiftKey) {
+          document.execCommand('outdent', true, null);
+        } else {
+          document.execCommand('indent', true, null);
+        }
+        e.preventDefault();
+    }
   }
 
   onChange() {
