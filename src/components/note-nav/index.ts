@@ -2,7 +2,7 @@ import {Component} from 'angular2/core';
 import {NgFor} from 'angular2/common';
 import {ROUTER_DIRECTIVES, Router} from 'angular2/router';
 import './style.scss';
-import Notes, {Note} from '../../notes';
+import {INote, NotesService} from '../../notes';
 
 @Component({
   selector: 'note-nav',
@@ -19,9 +19,18 @@ import Notes, {Note} from '../../notes';
   directives: [NgFor, ROUTER_DIRECTIVES]
 })
 export default class NoteNav {
-  notes: Note[];
+  notes: INote[];
 
-  constructor(private router: Router) {
-    this.notes = Notes.getList();
+  constructor(private router: Router, NotesService: NotesService) {
+    console.log(NotesService);
+
+    NotesService.notes
+      .map((notes: INote) => {
+        console.log(notes);
+        return notes;
+      }).subscribe((notes: INote[]) => {
+        // console.log(notes);
+        this.notes = notes;
+      });
   }
 }

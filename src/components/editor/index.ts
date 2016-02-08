@@ -1,6 +1,6 @@
 import {Component, Inject, ElementRef} from 'angular2/core';
 import {RouteParams} from 'angular2/router';
-import Notes, {Note} from '../../notes.ts';
+import {INote, NotesService} from '../../notes.ts';
 
 import './style.scss';
 
@@ -19,18 +19,19 @@ import './style.scss';
 })
 export default class Editor {
   id: number;
-  note: Note;
+  note: INote;
   root: HTMLElement;
   editable: HTMLDivElement;
   content: string;
 
   constructor(
     private routeParams: RouteParams,
+    NotesService: NotesService,
     @Inject(ElementRef) elementRef: ElementRef
   ) {
     this.root = elementRef.nativeElement;
     this.id = +routeParams.get('id');
-    this.note = Notes.get(this.id);
+    this.note = {}; // Notes.get(this.id);
     this.content = this.note.content;
   }
 
@@ -69,9 +70,9 @@ export default class Editor {
     const contentText = this.editable.innerText;
     const title = contentText.split(/\n|\<br\>/)[0];
 
-    Notes.set(this.id, {
-      title,
-      content
-    });
+    // Notes.set(this.id, {
+    //   title,
+    //   content
+    // });
   }
 }

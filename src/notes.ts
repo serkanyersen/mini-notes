@@ -1,48 +1,98 @@
 import {extend} from 'lodash';
-import {EventEmitter} from 'angular2/core';
+import {Injectable, bind} from 'angular2/core';
+import {Subject, Observable} from 'rxjs';
 
-export interface Note {
+export interface INote {
     id?: number;
     title?: string;
     content?: string;
 }
 
-const NOTES: Map<number, Note> = new Map<number, Note>();
+interface INotesOperation extends Function {
+  (messages: INote[]): INote[];
+}
 
-class Notes {
+// const NOTES: Map<number, INote> = new Map<number, INote>();
 
-  get(id: number): Note {
-    return NOTES.get(id);
-  }
+// class Notes {
 
-  getList(): Note[] {
-      var summaries: Note[] = [];
+//   get(id: number): INote {
+//     return NOTES.get(id);
+//   }
 
-      NOTES.forEach((note) => {
-          summaries.push({
-              id: note.id,
-              title: note.title
-          });
-      });
-      return summaries;
-  }
+//   getList(): INote[] {
+//       var summaries: INote[] = [];
 
-  set(id: number, note: Note) {
-      let updatedNote: Note = note;
+//       NOTES.forEach((note) => {
+//           summaries.push({
+//               id: note.id,
+//               title: note.title
+//           });
+//       });
+//       return summaries;
+//   }
 
-      if (NOTES.has(id)) {
-          updatedNote = extend(NOTES.get(id), note);
+//   set(id: number, note: INote) {
+//       let updatedNote: INote = note;
+
+//       if (NOTES.has(id)) {
+//           updatedNote = extend(NOTES.get(id), note);
+//       }
+
+//       NOTES.set(id, updatedNote);
+//   }
+// }
+
+// const singleton = new Notes();
+
+// singleton.set(1, {id: 1, title: 'My note', content: 'This is my note'});
+// singleton.set(2, {id: 2, title: 'test note', content: 'hello world test'});
+// singleton.set(3, {id: 3, title: 'html note', content: 'hello <i>world</i><hr>this is <b>note<b>'});
+// singleton.set(4, {id: 4, title: 'test', content: 'hmm.'});
+
+// export default singleton;
+
+let initialNotes: INote[] = [
+  {id: 1, title: 'My note', content: 'This is my note'},
+  {id: 2, title: 'test note', content: 'hello world test'},
+  {id: 3, title: 'html note', content: 'hello <i>world</i><hr>this is <b>note<b>'},
+  {id: 4, title: 'test', content: 'hmm.'}
+];
+
+@Injectable()
+export class NotesService {
+  notes: Observable<INote[]>;
+  newNotes: Subject<INote> = new Subject<INote>();
+  updates: Subject<any> = new Subject<any>();
+  create: Subject<INote> = new Subject<INote>();
+
+  constructor() {
+    this.notes = this.updates
+      .scan((
+            notes: INote[],
+            operation: INotesOperation) => {
+              return operation(notes)
+            },
+            initialNotes)
+      .publishReplay(1)
+      .refCount();
+
+    this.create.map(function(note: INote): INotesOperation {
+      return (notes: INote[]) => {
+        return notes.concat(note);
       }
+    })
+    .subscribe(this.updates);
 
-      NOTES.set(id, updatedNote);
+    this.newNotes
+      .subscribe(this.create);
+  }
+
+  addNote(note: INote): void {
+    this.newNotes.next(note);
   }
 }
 
-const singleton = new Notes();
-
-singleton.set(1, {id: 1, title: 'My note', content: 'This is my note'});
-singleton.set(2, {id: 2, title: 'test note', content: 'hello world test'})
-singleton.set(3, {id: 3, title: 'html note', content: 'hello <i>world</i><hr>this is <b>note<b>'})
-singleton.set(4, {id: 4, title: 'test', content: 'hmm.'})
-
-export default singleton;
+export var notesServiceInjectables: Array<any> = [
+  bind(NotesService).toClass(NotesService)
+]
