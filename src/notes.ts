@@ -1,4 +1,3 @@
-import {extend} from 'lodash';
 import {Injectable, bind} from 'angular2/core';
 import {Subject, Observable} from 'rxjs';
 
@@ -9,51 +8,11 @@ export interface INote {
 }
 
 interface INotesOperation extends Function {
-  (messages: INote[]): INote[];
+  (notes: INote[]): INote[];
 }
 
-// const NOTES: Map<number, INote> = new Map<number, INote>();
-
-// class Notes {
-
-//   get(id: number): INote {
-//     return NOTES.get(id);
-//   }
-
-//   getList(): INote[] {
-//       var summaries: INote[] = [];
-
-//       NOTES.forEach((note) => {
-//           summaries.push({
-//               id: note.id,
-//               title: note.title
-//           });
-//       });
-//       return summaries;
-//   }
-
-//   set(id: number, note: INote) {
-//       let updatedNote: INote = note;
-
-//       if (NOTES.has(id)) {
-//           updatedNote = extend(NOTES.get(id), note);
-//       }
-
-//       NOTES.set(id, updatedNote);
-//   }
-// }
-
-// const singleton = new Notes();
-
-// singleton.set(1, {id: 1, title: 'My note', content: 'This is my note'});
-// singleton.set(2, {id: 2, title: 'test note', content: 'hello world test'});
-// singleton.set(3, {id: 3, title: 'html note', content: 'hello <i>world</i><hr>this is <b>note<b>'});
-// singleton.set(4, {id: 4, title: 'test', content: 'hmm.'});
-
-// export default singleton;
-
-let initialNotes: INote[] = [
-  {id: 1, title: 'My note', content: 'This is my note'},
+const initialNotes: INote[] = localStorage.getItem('notes') ? JSON.parse(localStorage.getItem('notes')) : [
+  {id: 1, title: 'My note', content: 'My note<br>yes my note dude.'},
   {id: 2, title: 'test note', content: 'hello world test'},
   {id: 3, title: 'html note', content: 'hello <i>world</i><hr>this is <b>note<b>'},
   {id: 4, title: 'test', content: 'hmm.'}
@@ -63,36 +22,55 @@ let initialNotes: INote[] = [
 export class NotesService {
   notes: Observable<INote[]>;
   newNotes: Subject<INote> = new Subject<INote>();
-  updates: Subject<any> = new Subject<any>();
+  updatesStream: Subject<any> = new Subject<any>();
+  update: Subject<INote> = new Subject<INote>();
   create: Subject<INote> = new Subject<INote>();
 
   constructor() {
-    this.notes = this.updates
-      .scan((
-            notes: INote[],
-            operation: INotesOperation) => {
-              return operation(notes)
-            },
-            initialNotes)
+    this.notes = this.updatesStream
+      .scan(
+        (notes: INote[], operation: INotesOperation) => {
+          return operation(notes);
+        },
+        initialNotes)
+      .startWith(initialNotes)
       .publishReplay(1)
-      .refCount();
+      .refCount(); // keep connected as long as there is an observer
 
-    this.create.map(function(note: INote): INotesOperation {
+    this.create.map((note: INote) => {
       return (notes: INote[]) => {
         return notes.concat(note);
-      }
+      };
     })
-    .subscribe(this.updates);
+    .subscribe(this.updatesStream);
 
     this.newNotes
       .subscribe(this.create);
+
+    this.update.map((updatedNote: INote) => {
+      return (notes: INote[]) => {
+        return notes.map((note: INote) => {
+          if (note.id === updatedNote.id) {
+            return updatedNote;
+          }
+          return note;
+        });
+      };
+    })
+    .subscribe(this.updatesStream);
+
+
+    // Let's save notes to localStorage for now
+    this.notes.subscribe((notes) => {
+      localStorage.setItem('notes', JSON.stringify(notes));
+    });
   }
 
-  addNote(note: INote): void {
+  add(note: INote): void {
     this.newNotes.next(note);
   }
 }
 
 export var notesServiceInjectables: Array<any> = [
   bind(NotesService).toClass(NotesService)
-]
+];
