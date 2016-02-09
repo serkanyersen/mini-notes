@@ -25,6 +25,7 @@ export class NotesService {
   updatesStream: Subject<any> = new Subject<any>();
   update: Subject<INote> = new Subject<INote>();
   create: Subject<INote> = new Subject<INote>();
+  delete: Subject<INote> = new Subject<INote>();
 
   constructor() {
     this.notes = this.updatesStream
@@ -59,6 +60,14 @@ export class NotesService {
     })
     .subscribe(this.updatesStream);
 
+    this.delete.map((deletedNote: INote) => {
+      return (notes: INote[]) => {
+        return notes.filter((note: INote) => {
+          return note.id !== deletedNote.id;
+        });
+      };
+    })
+    .subscribe(this.updatesStream);
 
     // Let's save notes to localStorage for now
     this.notes.subscribe((notes) => {
@@ -68,6 +77,10 @@ export class NotesService {
 
   add(note: INote): void {
     this.newNotes.next(note);
+  }
+
+  deleteNote(note: INote) {
+    this.delete.next(note);
   }
 }
 

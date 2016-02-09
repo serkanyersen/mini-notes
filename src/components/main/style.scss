@@ -51,14 +51,16 @@ body {
   }
 }
 
-.Sidebar--show {
-  margin-left: 0px;
-  background: white;
-  height: 100%;
-  z-index: 1;
+@media(max-width: 400px) {
+  .Sidebar--show {
+    margin-left: 0px;
+    background: white;
+    height: 100%;
+    z-index: 1;
 
-  &:after {
-    display: none;
+    &:after {
+      display: none;
+    }
   }
 }
 

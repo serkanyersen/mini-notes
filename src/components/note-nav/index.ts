@@ -14,6 +14,7 @@ import {Observable} from 'rxjs';
         <a [routerLink]="['Note', {id:note.id}]">
             {{ note.title }}
         </a>
+        <span class="NoteItem-delete" (click)="deleteNote(note)">&times;</span>
       </li>
     </ul>
   </nav>`,
@@ -25,9 +26,17 @@ export default class NoteNav {
   constructor(
     private router: Router,
     private cdr: ChangeDetectorRef,
-    notesService: NotesService) {
+    private notesService: NotesService) {
 
     this.notes = notesService.notes;
+
+    notesService.newNotes.subscribe((newNote: INote) => {
+      router.navigate(['Note', { id: newNote.id }]);
+    });
+  }
+
+  deleteNote(note: INote): void {
+    this.notesService.deleteNote(note);
   }
 
   /*
