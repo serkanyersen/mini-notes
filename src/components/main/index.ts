@@ -2,9 +2,11 @@ import {Component} from 'angular2/core';
 import {ROUTER_DIRECTIVES, RouteConfig} from 'angular2/router';
 import Editor from '../editor';
 import NoteNav from '../note-nav';
-import './style.scss';
+import {NotesService} from '../../notes';
 
-var template = require('./template.html');
+import './style.scss';
+// Typescript does not support string imports yet
+const template: string = require('./template.html');
 
 @Component({
   selector: 'main',
@@ -16,6 +18,10 @@ var template = require('./template.html');
 ])
 export default class Main {
 
+  constructor(
+    private notesService: NotesService
+  ) { }
+
   findParent(el: HTMLElement, className: string): HTMLElement {
     while (el.parentNode) {
       el = <HTMLElement>el.parentNode;
@@ -26,13 +32,21 @@ export default class Main {
     return null;
   }
 
+  newNote(): void {
+    this.notesService.add({
+      id: Date.now(), // needs to be replaced by random ID generator,
+      title: 'New Note',
+      content: ''
+    });
+  }
 
-  sidebarClick(event: Event) {
-    const el = <HTMLDivElement>event.target;
+  sidebarClick(event: Event): void {
+    const el: HTMLDivElement = <HTMLDivElement>event.target;
+
     if (el.classList.contains('Sidebar')) {
       el.classList.toggle('Sidebar--show');
     } else {
-      const parent = this.findParent(el, 'Sidebar')
+      const parent: HTMLElement = this.findParent(el, 'Sidebar');
       if (parent) {
         parent.classList.toggle('Sidebar--show');
       }

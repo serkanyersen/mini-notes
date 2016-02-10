@@ -1,48 +1,89 @@
-import {extend} from 'lodash';
-import {EventEmitter} from 'angular2/core';
+import {Injectable, bind} from 'angular2/core';
+import {Subject, Observable} from 'rxjs';
 
-export interface Note {
+export interface INote {
     id?: number;
     title?: string;
     content?: string;
 }
 
-const NOTES: Map<number, Note> = new Map<number, Note>();
+interface INotesOperation extends Function {
+  (notes: INote[]): INote[];
+}
 
-class Notes {
+const initialNotes: INote[] = localStorage.getItem('notes') ? JSON.parse(localStorage.getItem('notes')) : [
+  {id: 1, title: 'My note', content: 'My note<br>yes my note dude.'},
+  {id: 2, title: 'test note', content: 'hello world test'},
+  {id: 3, title: 'html note', content: 'hello <i>world</i><hr>this is <b>note<b>'},
+  {id: 4, title: 'test', content: 'hmm.'}
+];
 
-  get(id: number): Note {
-    return NOTES.get(id);
+@Injectable()
+export class NotesService {
+  notes: Observable<INote[]>;
+  newNotes: Subject<INote> = new Subject<INote>();
+  updatesStream: Subject<any> = new Subject<any>();
+  update: Subject<INote> = new Subject<INote>();
+  create: Subject<INote> = new Subject<INote>();
+  delete: Subject<INote> = new Subject<INote>();
+
+  constructor() {
+    this.notes = this.updatesStream
+      .scan(
+        (notes: INote[], operation: INotesOperation) => {
+          return operation(notes);
+        },
+        initialNotes)
+      .startWith(initialNotes)
+      .publishReplay(1)
+      .refCount(); // keep connected as long as there is an observer
+
+    this.create.map((note: INote) => {
+      return (notes: INote[]) => {
+        return notes.concat(note);
+      };
+    })
+    .subscribe(this.updatesStream);
+
+    this.newNotes
+      .subscribe(this.create);
+
+    this.update.map((updatedNote: INote) => {
+      return (notes: INote[]) => {
+        return notes.map((note: INote) => {
+          if (note.id === updatedNote.id) {
+            return updatedNote;
+          }
+          return note;
+        });
+      };
+    })
+    .subscribe(this.updatesStream);
+
+    this.delete.map((deletedNote: INote) => {
+      return (notes: INote[]) => {
+        return notes.filter((note: INote) => {
+          return note.id !== deletedNote.id;
+        });
+      };
+    })
+    .subscribe(this.updatesStream);
+
+    // Let's save notes to localStorage for now
+    this.notes.subscribe((notes) => {
+      localStorage.setItem('notes', JSON.stringify(notes));
+    });
   }
 
-  getList(): Note[] {
-      var summaries: Note[] = [];
-
-      NOTES.forEach((note) => {
-          summaries.push({
-              id: note.id,
-              title: note.title
-          });
-      });
-      return summaries;
+  add(note: INote): void {
+    this.newNotes.next(note);
   }
 
-  set(id: number, note: Note) {
-      let updatedNote: Note = note;
-
-      if (NOTES.has(id)) {
-          updatedNote = extend(NOTES.get(id), note);
-      }
-
-      NOTES.set(id, updatedNote);
+  deleteNote(note: INote) {
+    this.delete.next(note);
   }
 }
 
-const singleton = new Notes();
-
-singleton.set(1, {id: 1, title: 'My note', content: 'This is my note'});
-singleton.set(2, {id: 2, title: 'test note', content: 'hello world test'})
-singleton.set(3, {id: 3, title: 'html note', content: 'hello <i>world</i><hr>this is <b>note<b>'})
-singleton.set(4, {id: 4, title: 'test', content: 'hmm.'})
-
-export default singleton;
+export var notesServiceInjectables: Array<any> = [
+  bind(NotesService).toClass(NotesService)
+];

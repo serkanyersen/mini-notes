@@ -15,6 +15,7 @@ var config = {
     },
 
     cache: true,
+    devtool: 'inline-source-map',
 
     stats: {
         colors: true,

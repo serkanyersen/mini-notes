@@ -1,6 +1,7 @@
 import {Component, Inject, ElementRef} from 'angular2/core';
 import {RouteParams} from 'angular2/router';
-import Notes, {Note} from '../../notes.ts';
+import {INote, NotesService} from '../../notes.ts';
+import {find, extend} from 'lodash';
 
 import './style.scss';
 
@@ -19,41 +20,57 @@ import './style.scss';
 })
 export default class Editor {
   id: number;
-  note: Note;
+  note: INote;
   root: HTMLElement;
   editable: HTMLDivElement;
-  content: string;
+  content: string = '';
 
   constructor(
     private routeParams: RouteParams,
+    private notesService: NotesService,
     @Inject(ElementRef) elementRef: ElementRef
   ) {
     this.root = elementRef.nativeElement;
     this.id = +routeParams.get('id');
-    this.note = Notes.get(this.id);
-    this.content = this.note.content;
+
+    this.notesService.notes.map((notes: INote[]) => {
+        return find(notes, ['id', this.id]);
+    }).subscribe((note: INote) => {
+        this.note = note;
+    });
+
+    if (this.note) {
+      this.content = this.note.content;
+    } else {
+      this.notesService.add({
+        id: this.id,
+        title: 'Untitled Note'
+      });
+    }
   }
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     this.editable = <HTMLDivElement>this.root.querySelector('.Editor-editable');
 
-    this.editable.addEventListener("paste", function(e) {
+    this.editable.addEventListener('paste', function(e: ClipboardEvent): void {
       // cancel paste
       e.preventDefault();
 
       // get text representation of clipboard
-      var text = (<any>e).clipboardData.getData("text/plain");
+      let text: string = e.clipboardData.getData('text/plain');
 
       // Escape html
       text = text.replace(/\</g, '&lt;');
 
       // insert text manually
-      document.execCommand("insertHTML", false, text);
+      document.execCommand('insertHTML', false, text);
     });
+    this.editable.focus();
+    this.setCursorToEnd();
   }
 
-  onKeyDown(e: KeyboardEvent) {
-    if(e.keyCode == 9) {
+  onKeyDown(e: KeyboardEvent): void {
+    if (e.keyCode === 9) {
         document.execCommand('styleWithCSS', true, null);
         if (e.shiftKey) {
           document.execCommand('outdent', true, null);
@@ -64,14 +81,26 @@ export default class Editor {
     }
   }
 
-  onChange() {
-    const content = this.editable.innerHTML;
-    const contentText = this.editable.innerText;
-    const title = contentText.split(/\n|\<br\>/)[0];
+  onChange(): void {
+    const content: string = this.editable.innerHTML;
+    const contentText: string = this.editable.innerText;
+    const title: string = contentText.split(/\n|\<br\>/)[0] || 'Untitled Note';
 
-    Notes.set(this.id, {
+    this.notesService.update.next(extend({}, this.note, {
       title,
       content
-    });
+    }));
   }
+
+  setCursorToEnd(): void {
+    let range: Range;
+    let selection: Selection;
+
+    range = document.createRange(); // Create a range (a range is a like the selection but invisible)
+    range.selectNodeContents(this.editable); // Select the entire contents of the element with the range
+    range.collapse(false); // collapse the range to the end point. false means collapse to end rather than the start
+    selection = window.getSelection(); // get the selection object (allows you to change selection)
+    selection.removeAllRanges(); // remove any selections already made
+    selection.addRange(range); // make the range you have just created the visible selection
+}
 }
