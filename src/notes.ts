@@ -82,7 +82,7 @@ export class NotesService {
     .subscribe(this.updatesStream);
 
     // Let's save notes to localStorage for now
-    this.notes.subscribe((notes) => {
+    this.notes.subscribe((notes: INote[]) => {
       localStorage.setItem('notes', JSON.stringify(notes));
     });
   }
@@ -91,7 +91,7 @@ export class NotesService {
     this.newNotes.next(note);
   }
 
-  deleteNote(note: INote) {
+  deleteNote(note: INote): void {
     this.delete.next(note);
   }
 }
