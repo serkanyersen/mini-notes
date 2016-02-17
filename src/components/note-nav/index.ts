@@ -1,9 +1,10 @@
 import {Component, ChangeDetectorRef} from 'angular2/core';
 import {NgFor} from 'angular2/common';
 import {ROUTER_DIRECTIVES, Router} from 'angular2/router';
-import './style.scss';
-import {INote, NotesService} from '../../notes';
 import {Observable} from 'rxjs';
+import {INote, NotesService} from '../../notes';
+
+import './style.scss';
 
 @Component({
   selector: 'note-nav',
@@ -21,20 +22,31 @@ import {Observable} from 'rxjs';
   directives: [NgFor, ROUTER_DIRECTIVES]
 })
 export default class NoteNav {
+  // Notes list to be used in the template
   notes: Observable<INote[]>;
 
   constructor(
     private router: Router,
+    // This was needed to trigger change detection
+    // It's completely unjustified, I assume it's a bug
     private cdr: ChangeDetectorRef,
-    private notesService: NotesService) {
+    private notesService: NotesService) { // End of args
 
-    this.notes = notesService.notes;
+      // but notes stream in the scope, you can see this used
+      // in the template followed by `| async` rest is handled
+      // by angular. Very simple
+      this.notes = notesService.notes;
 
-    notesService.newNotes.subscribe((newNote: INote) => {
-      router.navigate(['Note', { id: newNote.id }]);
-    });
+      // Watch when a new note is created and simply
+      // navigate to the new note.
+      notesService.newNotes.subscribe((newNote: INote) => {
+        router.navigate(['Note', { id: newNote.id }]);
+      });
   }
 
+  /**
+   * Thanks for your service note, bye now.
+   */
   deleteNote(note: INote): void {
     this.notesService.deleteNote(note);
   }

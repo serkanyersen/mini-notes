@@ -5,12 +5,23 @@ import NoteNav from '../note-nav';
 import {NotesService} from '../../notes';
 
 import './style.scss';
-// Typescript does not support string imports yet
-const template: string = require('./template.html');
 
 @Component({
   selector: 'main',
-  template,
+  template: `
+    <div class="Header">
+      <button (click)="newNote()">New Note</button>
+    </div>
+    <div class="Container">
+        <div class="Sidebar" (click)="sidebarClick($event)">
+            <note-nav></note-nav>
+        </div>
+        <div class="Content">
+            <router-outlet></router-outlet>
+        </div>
+    </div>
+    <div class="Footer">Footer</div>
+  `,
   directives: [Editor, NoteNav, ROUTER_DIRECTIVES]
 })
 @RouteConfig([
@@ -19,9 +30,13 @@ const template: string = require('./template.html');
 export default class Main {
 
   constructor(
+    // typescript automatically puts private or public arguments in `this`
     private notesService: NotesService
-  ) { }
+  ) { } // Empty constructor is super ugly
 
+  /**
+   * Utility function to find parent of given class on a DOMElement
+   */
   findParent(el: HTMLElement, className: string): HTMLElement {
     while (el.parentNode) {
       el = <HTMLElement>el.parentNode;
@@ -32,6 +47,9 @@ export default class Main {
     return null;
   }
 
+  /**
+   * Creates a new note with empty values
+   */
   newNote(): void {
     this.notesService.add({
       id: Date.now(), // needs to be replaced by random ID generator,
@@ -40,6 +58,10 @@ export default class Main {
     });
   }
 
+  /**
+   * When sidebar is clicked toggle the --show class
+   * so on mobile sidebar slides in.
+   */
   sidebarClick(event: Event): void {
     const el: HTMLDivElement = <HTMLDivElement>event.target;
 

@@ -1,16 +1,27 @@
 import {Injectable, bind} from 'angular2/core';
 import {Subject, Observable} from 'rxjs';
 
+/**
+ * Simple interface for the Note objects
+ * This should actually be a Model and
+ * used as new Note({}) everywhere. But
+ * interface also does the job
+ */
 export interface INote {
     id?: number;
     title?: string;
     content?: string;
 }
 
+// Each stream operation requires a map function
+// this is simply an interface for it
 interface INotesOperation extends Function {
   (notes: INote[]): INote[];
 }
 
+/**
+ * Get initial mock data or read it from localStorage
+ */
 const initialNotes: INote[] = localStorage.getItem('notes') ? JSON.parse(localStorage.getItem('notes')) : [
   {id: 1, title: 'My note', content: 'My note<br>yes my note dude.'},
   {id: 2, title: 'test note', content: 'hello world test'},
@@ -20,6 +31,7 @@ const initialNotes: INote[] = localStorage.getItem('notes') ? JSON.parse(localSt
 
 @Injectable()
 export class NotesService {
+  // Main stream that keeps the up-to-date list of notes
   notes: Observable<INote[]>;
   newNotes: Subject<INote> = new Subject<INote>();
   updatesStream: Subject<any> = new Subject<any>();
