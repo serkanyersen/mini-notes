@@ -23,11 +23,14 @@ var config = {
         cached: true
     },
 
-    entry: path.resolve('./src/index.ts'),
+    entry: {
+        app: path.resolve('./src/index.ts'),
+        preload: ['angular2/bundles/angular2-polyfills.js', 'es6-shim']
+    },
 
     output: {
         path: path.resolve('./app/build/'),
-        filename: 'bundle.js',
+        filename: '[name].bundle.js',
         pathinfo: true
     },
 
